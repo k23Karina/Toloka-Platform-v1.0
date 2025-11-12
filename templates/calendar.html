@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Календар толок - Толока{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>📅 Календар толок</h1>
+    </div>
+
+    <div id="calendar-view"></div>
+
+    <div class="events-list">
+        <h2>Найближчі події</h2>
+        {% if events_json %}
+            {% for event_data in events_json %}
+            <div class="calendar-event-card">
+                <div class="event-date-badge">
+                    <div class="date-day">{{ event_data.start[:10] }}</div>
+                </div>
+                <div class="event-info">
+                    <h3>{{ event_data.title }}</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ event_data.location }}</p>
+                    <p><i class="fas fa-clock"></i> {{ event_data.start[11:16] }}</p>
+                </div>
+                <a href="{{ event_data.url }}" class="btn btn-primary">Детальніше</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-times fa-4x"></i>
+                <p>Найближчих подій немає</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+const eventsData = {{ events_json|tojson }};
+
+// Простий календар на місяць
+function renderSimpleCalendar() {
+    const container = document.getElementById('calendar-view');
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+
+    const monthNames = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
+                       'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    let html = `<div class="calendar-header"><h2>${monthNames[month]} ${year}</h2></div>`;
+    html += '<div class="calendar-grid">';
+    html += '<div class="calendar-day-name">Нд</div><div class="calendar-day-name">Пн</div><div class="calendar-day-name">Вт</div><div class="calendar-day-name">Ср</div><div class="calendar-day-name">Чт</div><div class="calendar-day-name">Пт</div><div class="calendar-day-name">Сб</div>';
+
+    // Пусті клітинки до початку місяця
+    for (let i = 0; i < (firstDay === 0 ? 6 : firstDay - 1); i++) {
+        html += '<div class="calendar-day empty"></div>';
+    }
+
+    // Дні місяця
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const hasEvent = eventsData.some(e => e.start.startsWith(dateStr));
+        const isToday = day === now.getDate() && month === now.getMonth();
+
+        html += `<div class="calendar-day ${hasEvent ? 'has-event' : ''} ${isToday ? 'today' : ''}">
+            <span class="day-number">${day}</span>
+            ${hasEvent ? '<span class="event-dot"></span>' : ''}
+        </div>`;
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+renderSimpleCalendar();
+</script>
+{% endblock %}

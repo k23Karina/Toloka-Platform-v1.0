@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1>Разом за чисте місто! 🌱</h1>
+        <p>Приєднуйтесь до толок та робіть своє місто чистішим</p>
+        <div class="hero-buttons">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('create_event') }}" class="btn btn-primary btn-lg">Створити толоку</a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Приєднатися</a>
+            {% endif %}
+            <a href="{{ url_for('calendar') }}" class="btn btn-secondary btn-lg">Переглянути події</a>
+        </div>
+    </div>
+</section>
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-number">{{ stats.total_events }}</div><div class="stat-label">Толок</div></div>
+            <div class="stat-card"><div class="stat-icon">♻️</div><div class="stat-number">{{ "%.1f"|format(stats.total_waste) }} кг</div><div class="stat-label">Сміття</div></div>
+            <div class="stat-card"><div class="stat-icon">✨</div><div class="stat-number">{{ "%.0f"|format(stats.total_area) }} м²</div><div class="stat-label">Території</div></div>
+            <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-number">{{ stats.total_users }}</div><div class="stat-label">Учасників</div></div>
+        </div>
+    </div>
+</section>
+<section class="events-section">
+    <div class="container">
+        <h2>Найближчі толоки</h2>
+        {% if events %}
+            <div class="events-grid">
+                {% for event in events %}
+                <div class="event-card">
+                    {% if event.image_before %}<img src="{{ url_for('static', filename='uploads/' + event.image_before) }}" class="event-image">{% else %}<div class="event-image-placeholder"><i class="fas fa-leaf fa-3x"></i></div>{% endif %}
+                    <div class="event-card-content">
+                        <h3>{{ event.title }}</h3>
+                        <p class="event-meta"><i class="fas fa-map-marker-alt"></i> {{ event.location }}</p>
+                        <p class="event-meta"><i class="fas fa-calendar"></i> {{ event.date.strftime('%d.%m.%Y %H:%M') }}</p>
+                        <p class="event-meta"><i class="fas fa-users"></i> {{ event.participants|length }}{% if event.max_participants %}/{{ event.max_participants }}{% endif %}</p>
+                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary btn-block">Детальніше</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="text-align:center;color:#999;">Найближчих толок немає</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

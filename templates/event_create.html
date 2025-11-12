@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Створити толоку - Толока{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Створити нову толоку</h1>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="event-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="title">Назва події *</label>
+                <input type="text" id="title" name="title" required placeholder="Наприклад: Прибирання парку Шевченка">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Опис</label>
+            <textarea id="description" name="description" rows="5" placeholder="Детальний опис події, що потрібно взяти з собою..."></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="location">Місце зустрічі *</label>
+                <input type="text" id="location" name="location" required placeholder="Адреса або назва місця">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="latitude">Широта (натисніть на карті)</label>
+                <input type="number" step="0.000001" id="latitude" name="latitude" readonly>
+            </div>
+            <div class="form-group">
+                <label for="longitude">Довгота (натисніть на карті)</label>
+                <input type="number" step="0.000001" id="longitude" name="longitude" readonly>
+            </div>
+        </div>
+
+        <div id="map-select" style="height: 300px; margin: 20px 0; border: 2px solid #ddd; border-radius: 8px;">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999;">
+                Карта (для демо - встановіть координати Києва: 50.4501, 30.5234)
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="date">Дата та час *</label>
+                <input type="datetime-local" id="date" name="date" required>
+            </div>
+            <div class="form-group">
+                <label for="duration">Тривалість (хвилин)</label>
+                <input type="number" id="duration" name="duration" value="120" min="30">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="max_participants">Максимум учасників</label>
+                <input type="number" id="max_participants" name="max_participants" min="1" placeholder="Залиште пустим для необмеженої кількості">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="image_before">Фото місця (до прибирання)</label>
+            <input type="file" id="image_before" name="image_before" accept="image/*">
+            <small>Максимум 16 МБ. Формати: JPG, PNG, GIF, WebP</small>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg">Створити толоку</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg">Скасувати</a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Простий вибір координат для демо
+document.getElementById('map-select').addEventListener('click', function() {
+    const lat = prompt('Введіть широту (наприклад 50.4501 для Києва):');
+    const lng = prompt('Введіть довготу (наприклад 30.5234 для Києва):');
+
+    if (lat && lng) {
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+        this.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #2ecc71;">
+            ✓ Координати встановлено: ${lat}, ${lng}
+        </div>`;
+    }
+});
+
+// Встановлення мінімальної дати (сьогодні)
+const now = new Date();
+now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+document.getElementById('date').min = now.toISOString().slice(0, 16);
+</script>
+{% endblock %}

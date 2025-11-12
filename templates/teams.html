@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Команди - Толока{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>👥 Команди</h1>
+        {% if current_user.is_authenticated %}
+        <button class="btn btn-primary" onclick="showCreateTeamModal()">Створити команду</button>
+        {% endif %}
+    </div>
+
+    <div class="teams-grid">
+        {% for team in teams %}
+        <div class="team-card">
+            <div class="team-header">
+                <h3>{{ team.name }}</h3>
+                <span class="team-league league-{{ team.league }}">{{ team.league }}</span>
+            </div>
+            <p>{{ team.description }}</p>
+            <div class="team-stats">
+                <span><i class="fas fa-users"></i> {{ team.members|length }} членів</span>
+                <span><i class="fas fa-trophy"></i> {{ team.points }} балів</span>
+                <span><i class="fas fa-calendar-check"></i> {{ team.events_count }} толок</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="createTeamModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Створити команду</h2>
+        <form method="POST" action="{{ url_for('create_team') }}">
+            <div class="form-group">
+                <label for="name">Назва команди *</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Опис</label>
+                <textarea id="description" name="description" rows="4"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Створити</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function showCreateTeamModal() {
+    document.getElementById('createTeamModal').style.display = 'block';
+}
+function closeModal() {
+    document.getElementById('createTeamModal').style.display = 'none';
+}
+window.onclick = function(e) {
+    const modal = document.getElementById('createTeamModal');
+    if (e.target == modal) closeModal();
+}
+</script>
+{% endblock %}

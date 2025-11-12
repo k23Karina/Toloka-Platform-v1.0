@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} - Толока{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="event-detail">
+        <div class="event-header">
+            <h1>{{ event.title }}</h1>
+            <span class="event-status status-{{ event.status }}">
+                {% if event.status == 'planned' %}Заплановано
+                {% elif event.status == 'active' %}Активно
+                {% elif event.status == 'completed' %}Завершено
+                {% else %}Скасовано{% endif %}
+            </span>
+        </div>
+
+        <div class="event-images">
+            {% if event.image_before %}
+            <div class="event-image-container">
+                <h3>До прибирання</h3>
+                <img src="{{ url_for('static', filename='uploads/' + event.image_before) }}" alt="До">
+            </div>
+            {% endif %}
+
+            {% if event.image_after %}
+            <div class="event-image-container">
+                <h3>Після прибирання</h3>
+                <img src="{{ url_for('static', filename='uploads/' + event.image_after) }}" alt="Після">
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="event-content">
+            <div class="event-main">
+                <div class="event-info-card">
+                    <h3>Деталі події</h3>
+                    <div class="info-item">
+                        <i class="fas fa-calendar"></i>
+                        <div>
+                            <strong>Дата:</strong>
+                            <p>{{ event.date.strftime('%d.%m.%Y %H:%M') }}</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <strong>Тривалість:</strong>
+                            <p>{{ event.duration }} хвилин</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <strong>Локація:</strong>
+                            <p>{{ event.location }}</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-user"></i>
+                        <div>
+                            <strong>Організатор:</strong>
+                            <p><a href="{{ url_for('profile', username=event.creator.username) }}">{{ event.creator.username }}</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if event.description %}
+                <div class="event-description">
+                    <h3>Опис</h3>
+                    <p>{{ event.description }}</p>
+                </div>
+                {% endif %}
+
+                {% if event.status == 'completed' %}
+                <div class="event-results">
+                    <h3>Результати</h3>
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <div class="result-icon">♻️</div>
+                            <div class="result-value">{{ event.waste_collected }} кг</div>
+                            <div class="result-label">Зібрано сміття</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-icon">✨</div>
+                            <div class="result-value">{{ event.area_cleaned }} м²</div>
+                            <div class="result-label">Очищено території</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="event-sidebar">
+                <div class="participants-card">
+                    <h3>Учасники ({{ event.participants|length }}{% if event.max_participants %}/{{ event.max_participants }}{% endif %})</h3>
+
+                    {% if current_user.is_authenticated and event.status == 'planned' %}
+                        {% if not is_participant %}
+                            <form method="POST" action="{{ url_for('join_event', event_id=event.id) }}">
+                                <button type="submit" class="btn btn-primary btn-block">Приєднатися</button>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('leave_event', event_id=event.id) }}">
+                                <button type="submit" class="btn btn-outline btn-block">Відмінити участь</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+
+                    <ul class="participants-list">
+                        {% for participant in event.participants %}
+                        <li>
+                            <a href="{{ url_for('profile', username=participant.username) }}">
+                                <i class="fas fa-user-circle"></i> {{ participant.username }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                {% if current_user.is_authenticated and current_user.id == event.creator_id and event.status == 'planned' %}
+                <div class="complete-event-card">
+                    <h3>Завершити подію</h3>
+                    <form method="POST" action="{{ url_for('complete_event', event_id=event.id) }}" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="waste_collected">Зібрано сміття (кг)</label>
+                            <input type="number" step="0.1" id="waste_collected" name="waste_collected" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="area_cleaned">Очищено території (м²)</label>
+                            <input type="number" step="0.1" id="area_cleaned" name="area_cleaned" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="image_after">Фото після</label>
+                            <input type="file" id="image_after" name="image_after" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block">Завершити</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

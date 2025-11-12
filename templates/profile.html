@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }} - Толока{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user-circle fa-5x"></i>
+        </div>
+        <div class="profile-info">
+            <h1>{{ user.full_name or user.username }}</h1>
+            <p class="profile-username">@{{ user.username }}</p>
+            <p class="profile-joined">Приєднався {{ user.created_at.strftime('%d.%m.%Y') }}</p>
+        </div>
+    </div>
+
+    <div class="profile-stats">
+        <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-number">{{ user.points }}</div>
+            <div class="stat-label">Балів</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-number">{{ user.events_count }}</div>
+            <div class="stat-label">Толок</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">♻️</div>
+            <div class="stat-number">{{ "%.1f"|format(user.total_waste) }} кг</div>
+            <div class="stat-label">Сміття</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✨</div>
+            <div class="stat-number">{{ "%.0f"|format(user.total_area) }} м²</div>
+            <div class="stat-label">Території</div>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="achievements-section">
+            <h2>Досягнення</h2>
+            {% if achievements %}
+            <div class="achievements-grid">
+                {% for ua in achievements %}
+                <div class="achievement-badge">
+                    <div class="achievement-icon">{{ ua.achievement.icon }}</div>
+                    <div class="achievement-name">{{ ua.achievement.name }}</div>
+                    <div class="achievement-desc">{{ ua.achievement.description }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>Досягнень поки немає. Приєднуйтесь до толок!</p>
+            {% endif %}
+        </div>
+
+        <div class="recent-events">
+            <h2>Останні події</h2>
+            {% if events %}
+            <ul class="events-list-simple">
+                {% for event in events %}
+                <li><a href="{{ url_for('event_detail', event_id=event.id) }}">{{ event.title }}</a> - {{ event.date.strftime('%d.%m.%Y') }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>Ще не було участі у толоках</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
